@@ -1,18 +1,28 @@
 from flask import Flask, render_template, jsonify, request
 import os
 import json
+import logging
 
 app = Flask(__name__)
 
 # Set the data directory
-data_dir = '/data'
+data_dir = 'data'  # Local directory for data storage
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
 
 def load_json(filename):
     filepath = os.path.join(data_dir, filename)
+    logging.debug(f"Loading JSON file: {filepath}")
     if os.path.exists(filepath):
         with open(filepath) as f:
-            return json.load(f)
+            try:
+                return json.load(f)
+            except json.JSONDecodeError as e:
+                logging.error(f"Error decoding JSON from {filepath}: {e}")
+                return {"error": "Invalid JSON format"}
     else:
+        logging.error(f"File not found: {filepath}")
         return {"error": "File not found"}
 
 @app.route('/')
