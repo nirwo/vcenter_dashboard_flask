@@ -1,15 +1,19 @@
 from flask import Flask, render_template, jsonify, request
-import json
 import os
+import json
 
 app = Flask(__name__)
 
-def load_json(file_path):
-    try:
-        with open(file_path) as f:
-            return jsonify(json.load(f))
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+# Set the data directory
+data_dir = '/data'
+
+def load_json(filename):
+    filepath = os.path.join(data_dir, filename)
+    if os.path.exists(filepath):
+        with open(filepath) as f:
+            return json.load(f)
+    else:
+        return {"error": "File not found"}
 
 @app.route('/')
 def index():
@@ -17,37 +21,39 @@ def index():
 
 @app.route('/health')
 def health():
-    return load_json('/data/health_status.json')
+    data = load_json('health_status.json')
+    return jsonify(data)
 
 @app.route('/events')
 def events():
-    return load_json('/data/events.json')
+    data = load_json('events.json')
+    return jsonify(data)
 
 @app.route('/recommendations')
 def recommendations():
-    return load_json('/data/vm_recommendations.json')
+    data = load_json('vm_recommendations.json')
+    return jsonify(data)
 
 @app.route('/resource_utilization')
 def resource_utilization():
-    return load_json('/data/resource_utilization.json')
+    data = load_json('resource_utilization.json')
+    return jsonify(data)
 
 @app.route('/zombie_files')
 def zombie_files():
-    return load_json('/data/zombie_files.json')
+    data = load_json('zombie_files.json')
+    return jsonify(data)
 
 @app.route('/search')
 def search():
     query = request.args.get('q')
     results = []
-    try:
-        with open('/data/vm_recommendations.json') as f:
-            data = json.load(f)
-            for item in data:
-                if query.lower() in item['VMName'].lower():
-                    results.append(item['VMName'])
-        return jsonify(results)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    data = load_json('vm_recommendations.json')
+    if "error" not in data:
+        for item in data:
+            if query.lower() in item['VMName'].lower():
+                results.append(item['VMName'])
+    return jsonify(results)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0')
