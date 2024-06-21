@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Resource Utilization</title>
+  </head>
+  <body>
+    <h1>Resource Utilization</h1>
+    <ul>
+      {% for item in data %}
+      <li>
+        {{ item.VMName }}: CPU {{ item.CPUUsage }}, Memory {{ item.MemoryUsage
+        }}, Disk {{ item.DiskUsage }}, Network {{ item.NetworkUsage }}
+      </li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>
