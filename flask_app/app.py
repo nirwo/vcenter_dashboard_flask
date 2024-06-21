@@ -1,7 +1,15 @@
 from flask import Flask, render_template, jsonify, request
 import json
+import os
 
 app = Flask(__name__)
+
+def load_json(file_path):
+    try:
+        with open(file_path) as f:
+            return jsonify(json.load(f))
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/')
 def index():
@@ -9,44 +17,37 @@ def index():
 
 @app.route('/health')
 def health():
-    with open('/data/health_status.json') as f:
-        data = json.load(f)
-    return jsonify(data)
+    return load_json('/data/health_status.json')
 
 @app.route('/events')
 def events():
-    with open('/data/events.json') as f):
-        data = json.load(f)
-    return jsonify(data)
+    return load_json('/data/events.json')
 
 @app.route('/recommendations')
 def recommendations():
-    with open('/data/vm_recommendations.json') as f:
-        data = json.load(f)
-    return jsonify(data)
+    return load_json('/data/vm_recommendations.json')
 
 @app.route('/resource_utilization')
 def resource_utilization():
-    with open('/data/resource_utilization.json') as f:
-        data = json.load(f)
-    return jsonify(data)
+    return load_json('/data/resource_utilization.json')
 
 @app.route('/zombie_files')
 def zombie_files():
-    with open('/data/zombie_files.json') as f):
-        data = json.load(f)
-    return jsonify(data)
+    return load_json('/data/zombie_files.json')
 
 @app.route('/search')
 def search():
     query = request.args.get('q')
     results = []
-    with open('/data/vm_recommendations.json') as f:
-        data = json.load(f)
-        for item in data:
-            if query.lower() in item['VMName'].lower():
-                results.append(item['VMName'])
-    return jsonify(results)
+    try:
+        with open('/data/vm_recommendations.json') as f:
+            data = json.load(f)
+            for item in data:
+                if query.lower() in item['VMName'].lower():
+                    results.append(item['VMName'])
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
